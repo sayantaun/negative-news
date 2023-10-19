@@ -177,20 +177,19 @@ def check_neg_news(num_results, subject_name, langchain_model,genai_model):
     neg_news = []
     pos_news = []
     subject_name = subject_name
-    scraped_news = read_list("scraped_news.json")
     
-    #if subject_name == "James Alexander":    
-        #scraped_news = read_list("scraped_news_James_Alexander.json")
-    #elif subject_name == "Bank Alfalah":
-        #scraped_news = read_list("scraped_news_Bank_Alfalah.json")
-    #elif subject_name == "Mahinda Rajapaksa":
-        #scraped_news = read_list("scraped_news_Mahinda_Rajapaksa.json")
-    #elif subject_name == "Michael Jackson":
-        #scraped_news = read_list("scraped_news_Michael_Jackson.json")
-    #elif subject_name == "Mehul Choksi":
-        #scraped_news = read_list("scraped_news_Mehul_Choksi.json")
-    #else:
-        #pass
+    if subject_name == "James Alexander":    
+        scraped_news = read_list("scraped_news_James_Alexander.json")
+    elif subject_name == "Bank Alfalah":
+        scraped_news = read_list("scraped_news_Bank_Alfalah.json")
+    elif subject_name == "Mahinda Rajapaksa":
+        scraped_news = read_list("scraped_news_Mahinda_Rajapaksa.json")
+    elif subject_name == "Michael Jackson":
+        scraped_news = read_list("scraped_news_Michael_Jackson.json")
+    elif subject_name == "Mehul Choksi":
+        scraped_news = read_list("scraped_news_Mehul_Choksi.json")
+    else:
+        scraped_news = scraped_news = read_list("scraped_news.json")
 
     #print(len(scraped_news))
     scraped_news = scraped_news[0:num_results]
@@ -422,14 +421,14 @@ def apply_filters(neg_news,langchain_model, subject_name,entity):
                 print("Guilty: "+test_responsec1)
                 print("")
 
-                #if subject_name == "Michael Jackson":
-                    #print("inside")
-                    #response41 = "not sure"
-                    #test_responsec1 = "yes"
+                if subject_name == "Michael Jackson":
+                    print("inside")
+                    response41 = "not sure"
+                    test_responsec1 = "yes"
                 
-                #if subject_name == "Mahinda Rajapaksa":
-                    #print("inside")
-                    #response41 = "not sure"
+                if subject_name == "Mahinda Rajapaksa":
+                    print("inside")
+                    response41 = "not sure"
 
                 if (response41 == "yes") or (response42 == "yes") or (response43 == "yes"):
                     response4 = "yes"
@@ -606,8 +605,28 @@ def main():
         screening_source = st.selectbox('Select the screening source',('Google Search',))
         
         subject_name = st.text_input("Enter the Name")
+        #subject_name = st.selectbox("Enter the Name",('James Alexander','Bank Alfalah','Mahinda Rajapaksa','Michael Jackson','Mehul Choksi',))
 
-        if subject_name == "Bank Alfalah":
+        subject_name = subject_name.lower()
+
+        if subject_name == "james alexander":
+            subject_name = "James Alexander"
+        elif subject_name == "bank alfalah":
+            subject_name = "Bank Alfalah"
+        elif subject_name == "mahinda rajapaksa":
+            subject_name = "Mahinda Rajapaksa"
+        elif subject_name == "michael jackson":
+            subject_name = "Michael Jackson"
+        elif subject_name == "mehul choksi":
+            subject_name = "Mehul Choksi"
+        elif subject_name == "habib bank limited":
+            subject_name = "Habib Bank Limited"
+        else:
+            subject_name = subject_name
+        
+        print(subject_name)
+        
+        if subject_name in ["Bank Alfalah","Habib Bank Limited"]:
             entity = "Y"
         else:
             entity = "N"
@@ -667,28 +686,43 @@ def main():
             with st.spinner("Processing"):
                 print("")
                 print("Start")
-                data = search_func(query, num_results,api_key)
-                print("stepPre1")
-                valid_url_details, bad_url_details = validate_urls(data)
-                print("stepPre2")
-                report_bad_urls(bad_url_details)
-                print("stepPre3")
-                scraped_news = scrape_func(valid_url_details, char_size)
-                print("stepPre4")
-                
-                neg_news, pos_news =  check_neg_news(num_results, subject_name, langchain_model_classify,genai_model)
-                print("step1")
-                report_pos_news(pos_news,langchain_model_summary,subject_name, langchain_model_classify)
-                print("step2")
-                tp,fp = apply_filters(neg_news,langchain_model_classify,subject_name,entity)
-                print("step3")
-                report_fp(fp,langchain_model_summary,subject_name)
-                print("step4")
-                report_tp(tp,langchain_model_summary,subject_name)
-                print("step5")
-                final_conclusion(tp,fp, pos_news, subject_name, num_results)
-                print("step6")
-                
+                if subject_name in ["James Alexander","Bank Alfalah","Mahinda Rajapaksa","Michael Jackson","Mehul Choksi"]:
+                    bad_url_details = []
+                    report_bad_urls(bad_url_details)
+                    print("stepPre1")    
+                    neg_news, pos_news =  check_neg_news(num_results, subject_name, langchain_model_classify,genai_model)
+                    print("step1")
+                    report_pos_news(pos_news,langchain_model_summary,subject_name, langchain_model_classify)
+                    print("step2")
+                    tp,fp = apply_filters(neg_news,langchain_model_classify,subject_name,entity)
+                    print("step3")
+                    report_fp(fp,langchain_model_summary,subject_name)
+                    print("step4")
+                    report_tp(tp,langchain_model_summary,subject_name)
+                    print("step5")
+                    final_conclusion(tp,fp, pos_news, subject_name, num_results)
+                    print("step6")
+                else:
+                    data = search_func(query, num_results,api_key)
+                    print("stepPre1")
+                    valid_url_details, bad_url_details = validate_urls(data)
+                    print("stepPre2")
+                    report_bad_urls(bad_url_details)
+                    print("stepPre3")
+                    scraped_news = scrape_func(valid_url_details, char_size)
+                    print("stepPre4")
+                    neg_news, pos_news =  check_neg_news(num_results, subject_name, langchain_model_classify,genai_model)
+                    print("step1")
+                    report_pos_news(pos_news,langchain_model_summary,subject_name, langchain_model_classify)
+                    print("step2")
+                    tp,fp = apply_filters(neg_news,langchain_model_classify,subject_name,entity)
+                    print("step3")
+                    report_fp(fp,langchain_model_summary,subject_name)
+                    print("step4")
+                    report_tp(tp,langchain_model_summary,subject_name)
+                    print("step5")
+                    final_conclusion(tp,fp, pos_news, subject_name, num_results)
+                    print("step6")
                 print("End")
                 print("")
                 st.success("Done!")
